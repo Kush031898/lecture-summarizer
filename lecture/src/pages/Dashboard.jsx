@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { motion, AnimatePresence } from 'framer-motion';
-import { UploadCloud, FileVideo, Sparkles, CheckCircle2, AlertTriangle, ExternalLink, Github, Linkedin } from 'lucide-react';
+import { UploadCloud, FileVideo, Sparkles, CheckCircle2, AlertTriangle, ExternalLink } from 'lucide-react';
+import { FaGithub, FaLinkedin } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import ReactMarkdown from 'react-markdown';
 import api from '../utils/api';
@@ -297,10 +298,10 @@ const Dashboard = () => {
                 Made with Love by Kush Mantoo(Author)
                 <div className="flex justify-center gap-4 mt-4">
                     <a href="https://github.com/Kush031898" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors">
-                        <Github className="w-6 h-6" />
+                        <FaGithub className="w-6 h-6" />
                     </a>
                     <a href="https://linkedin.com/in/kush-mantoo-7503a1253" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors">
-                        <Linkedin className="w-6 h-6" />
+                        <FaLinkedin className="w-6 h-6" />
                     </a>
                 </div>
             </div>
