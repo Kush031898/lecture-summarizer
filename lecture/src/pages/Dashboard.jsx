@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { motion, AnimatePresence } from 'framer-motion';
-import { UploadCloud, FileVideo, Loader2, Sparkles, CheckCircle2, AlertTriangle, ExternalLink } from 'lucide-react';
+import { UploadCloud, FileVideo, Sparkles, CheckCircle2, AlertTriangle, ExternalLink } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ReactMarkdown from 'react-markdown';
 import api from '../utils/api';
@@ -12,7 +12,6 @@ const Dashboard = () => {
     const [file, setFile] = useState(null);
     const [title, setTitle] = useState('');
     const [lectureId, setLectureId] = useState(null);
-    const [summary, setSummary] = useState('');
     const [activeTab, setActiveTab] = useState('summary'); // 'transcript', 'summary', 'quiz'
     const [parsedSummary, setParsedSummary] = useState({ transcript: '', summary: '', quiz: '' });
 
@@ -88,7 +87,6 @@ const Dashboard = () => {
                     if (res.data.success) {
                         if (res.data.status === 'Completed') {
                             const rawText = res.data.summary;
-                            setSummary(rawText);
                             setParsedSummary(parseMarkdown(rawText));
                             setAppState('result');
                             clearInterval(interval);
@@ -115,7 +113,6 @@ const Dashboard = () => {
         setFile(null);
         setTitle('');
         setLectureId(null);
-        setSummary('');
     };
 
     return (
