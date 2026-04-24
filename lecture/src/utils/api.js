@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 const api = axios.create({
-    // Changed to 4000 to match your Express server
-    baseURL: 'http://localhost:4000/api/v1',
+    baseURL: 'https://lecture-summarizer-mi8z.onrender.com/api/v1',
+    withCredentials: true,
 });
 
 // Interceptor to automatically attach your JWT token to every request
