@@ -12,7 +12,10 @@ const {cloudinaryConnect} = require("./config/cloudinary.js");
 // the body parser
 app.use(express.json());
 const cors = require("cors");
-app.use(cors());
+app.use(cors({
+    origin: "https://lecture-summarizer-ten.vercel.app",
+    credentials: true,
+}));
 // the file parser 
 const fileUpload = require("express-fileupload");
 app.use(fileUpload({
