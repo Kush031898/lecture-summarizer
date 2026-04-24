@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { User, Phone, Calendar, GraduationCap, Building, Loader2, Save, History, ChevronDown, ChevronUp, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../utils/api';
-import { useAuth } from '../context/AuthContext';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 
