@@ -34,6 +34,10 @@ const ProfileRoutes = require("./routes/Profile.js");
 app.use("/api/v1/summarizer",Upload);
 app.use("/api/v1/profile", ProfileRoutes);
 
+// Health check route
+app.get("/", (req, res) => {
+    res.status(200).json({ success: true, message: "Backend is running and healthy!" });
+});
 
 app.listen(PORT,() =>{
     console.log(`The App is connected succesfully at the Port No :- ${PORT}`)
