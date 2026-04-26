@@ -205,45 +205,71 @@ exports.login = async(req,res) =>{
 
 
 // change Password 
-//  now comes the logic for the change of the Password 
-    //   console.log("🔥 CONTROLLER STARTED");
+exports.changePassword = async (req, res) => {
+    try {
+        const { oldPassword, newPassword, confirmNewPassword } = req.body;
 
-    // return res.status(200).json({
-    //     success: true,
-    //     message: "TEST SUCCESS",
-    // });
+        // validate the data
+        if (!oldPassword || !newPassword || !confirmNewPassword) {
+            return res.status(400).json({
+                success: false,
+                message: "Please enter all the fields",
+            });
+        }
 
-    // try{
-    //     // fetch the email to which we want to send the email 
-    //     console.log("Printing the request from the front end ",req.body);
-    //     const{email} = req.body;
+        if (newPassword !== confirmNewPassword) {
+            return res.status(400).json({
+                success: false,
+                message: "New Password and Confirm New Password do not match",
+            });
+        }
 
-    //     // check if the user already exits 
-    //     const checkUser = await User.findOne({email});
+        // fetch user id from req.user (populated by auth middleware)
+        const userId = req.user.id;
+        const user = await User.findById(userId);
 
-    //     // check for the user 
-    //     if(checkUser)
-    //     {
-    //         return res.status(400).json({
-    //             success:false,
-    //             message:"User is already registered",
-    //         })
-    //     }
-    //         // now generate the otp 
-    //         // 1. Generate a 6-digit random number
-    //     const otp = crypto.randomInt(100000, 999999).toString();
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            });
+        }
 
-    //     // 2. Hash it (Security best practice)
-    //     const hashedOtp = await bcrypt.hash(otp, 10);
+        // check if old password matches
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) {
+            return res.status(401).json({
+                success: false,
+                message: "Incorrect old password",
+            });
+        }
 
-    //     // create the otp payload which will contain all the info about the otp 
-    //     const OtpPayload = {email,otp};
-    //     // now create the entry of the otp in the data base 
-    //     const Otpcreate = await OTP.create(OtpPayload);
-    //     await mailSender(email, "OTP Verification", otp);
-    //         console.log("The mail is sent successfully");
-    //     return res.status(200).json({
-    //         success:true,
-    //         message:"OTP sent successfully",
-    //     });
-    // }
+        // hash the new password and update
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedPassword;
+        await user.save();
+
+        // send email notification (optional but recommended)
+        try {
+            await mailSender(
+                user.email,
+                "Password Changed Successfully",
+                "Your password has been successfully updated for your Lecture Summarizer account."
+            );
+        } catch (error) {
+            console.log("Error sending password change email:", error.message);
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Password updated successfully",
+        });
+
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({
+            success: false,
+            message: "There was an error while changing the password, please try again later",
+        });
+    }
+};
