@@ -40,7 +40,7 @@ exports.ResetPasswordToken = async(req,res) =>{
             {new:true});
             console.log("Printing the updated User ",updateuser);
         // cerate the url 
-        const url = `https://localhost:3000/update-password/${token}`;
+        const url = `https://lecture-summarizer-ten.vercel.app/update-password/${token}`;
         // send the mail conatining all the info 
         await mailSender(email,"Password Reset Link",
             `This is your password reset link , that has been sent to you by the Lecture Solver : ${url}`);

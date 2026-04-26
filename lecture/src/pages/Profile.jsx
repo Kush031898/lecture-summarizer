@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Phone, Calendar, GraduationCap, Building, Loader2, Save, History, ChevronDown, ChevronUp, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import { User, Phone, Calendar, GraduationCap, Building, Loader2, Save, History, ChevronDown, ChevronUp, CheckCircle2, Clock, AlertCircle, Lock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../utils/api';
 
@@ -21,6 +21,13 @@ const Profile = () => {
     const [history, setHistory] = useState([]);
     const [expandedId, setExpandedId] = useState(null);
     const [activeTab, setActiveTab] = useState('summary');
+
+    const [passwordData, setPasswordData] = useState({
+        oldPassword: '',
+        newPassword: '',
+        confirmNewPassword: ''
+    });
+    const [passwordSaving, setPasswordSaving] = useState(false);
 
     useEffect(() => {
         const fetchProfileData = async () => {
@@ -71,6 +78,38 @@ const Profile = () => {
             toast.error("Error updating profile");
         } finally {
             setSaving(false);
+        }
+    };
+
+    const handlePasswordChange = (e) => {
+        const { name, value } = e.target;
+        setPasswordData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handlePasswordSubmit = async (e) => {
+        e.preventDefault();
+        
+        if (passwordData.newPassword !== passwordData.confirmNewPassword) {
+            return toast.error("New password and confirm password do not match");
+        }
+        
+        setPasswordSaving(true);
+        try {
+            const response = await api.post('/summarizer/changepassword', passwordData);
+            if (response.data.success) {
+                toast.success("Password updated successfully!");
+                setPasswordData({
+                    oldPassword: '',
+                    newPassword: '',
+                    confirmNewPassword: ''
+                });
+            } else {
+                toast.error(response.data.message || "Failed to update password");
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Error updating password");
+        } finally {
+            setPasswordSaving(false);
         }
     };
 
@@ -223,6 +262,73 @@ const Profile = () => {
                         >
                             {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
                             {saving ? "Saving..." : "Save Changes"}
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            {/* Change Password Card */}
+            <div className="bg-surface border border-white/10 rounded-3xl overflow-hidden shadow-2xl backdrop-blur-xl">
+                <div className="p-8 border-b border-white/10 flex items-center gap-4 bg-white/5">
+                    <div className="p-4 bg-rose-500/20 rounded-full text-rose-400">
+                        <Lock className="w-8 h-8" />
+                    </div>
+                    <div>
+                        <h2 className="text-3xl font-bold">Security</h2>
+                        <p className="text-slate-400 mt-1">Update your password to keep your account secure.</p>
+                    </div>
+                </div>
+
+                <form onSubmit={handlePasswordSubmit} className="p-8 space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2 md:col-span-2">
+                            <label className="text-sm font-medium text-slate-300">Current Password</label>
+                            <input
+                                type="password"
+                                name="oldPassword"
+                                value={passwordData.oldPassword}
+                                onChange={handlePasswordChange}
+                                placeholder="Enter current password"
+                                required
+                                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white placeholder-slate-500 focus:outline-none focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-slate-300">New Password</label>
+                            <input
+                                type="password"
+                                name="newPassword"
+                                value={passwordData.newPassword}
+                                onChange={handlePasswordChange}
+                                placeholder="Enter new password"
+                                required
+                                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white placeholder-slate-500 focus:outline-none focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-slate-300">Confirm New Password</label>
+                            <input
+                                type="password"
+                                name="confirmNewPassword"
+                                value={passwordData.confirmNewPassword}
+                                onChange={handlePasswordChange}
+                                placeholder="Confirm new password"
+                                required
+                                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white placeholder-slate-500 focus:outline-none focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="flex justify-end pt-6 border-t border-white/10">
+                        <button
+                            type="submit"
+                            disabled={passwordSaving}
+                            className="bg-rose-500 hover:bg-rose-600 disabled:opacity-70 disabled:cursor-not-allowed text-white font-medium py-3 px-8 rounded-xl transition-all flex items-center gap-2 shadow-lg shadow-rose-500/25"
+                        >
+                            {passwordSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+                            {passwordSaving ? "Updating..." : "Update Password"}
                         </button>
                     </div>
                 </form>

@@ -1,15 +1,16 @@
 const express = require("express");
 const router = express.Router();
 
-const {signUp,sendOtp,login} = require("../controllers/Auth.js");
-const {ResetPasswordToken,ResetPassword} = require("../controllers/ResetPassword.js");
+const {signUp, sendOtp, login, changePassword} = require("../controllers/Auth.js");
+const {ResetPasswordToken, ResetPassword} = require("../controllers/ResetPassword.js");
 const {auth} = require("../middlewares/auth.js");
 const {fileUploadToCloud, getStatus} = require("../controllers/LectureUpload.js");
 // connection of the controllers with the routes 
 
-router.post("/signup",signUp);
-router.post("/login",login);
-router.post("/sendOtp",sendOtp);
+router.post("/signup", signUp);
+router.post("/login", login);
+router.post("/sendOtp", sendOtp);
+router.post("/changepassword", auth, changePassword);
 
 
 // for the reset password 
