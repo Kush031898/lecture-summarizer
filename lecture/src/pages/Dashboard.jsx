@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { motion, AnimatePresence } from 'framer-motion';
-import { UploadCloud, FileVideo, Sparkles, CheckCircle2, AlertTriangle, ExternalLink } from 'lucide-react';
+import { UploadCloud, FileVideo, Sparkles, CheckCircle2, AlertTriangle, ExternalLink, TrendingUp, BookOpen, Flame } from 'lucide-react';
 import { FaGithub, FaLinkedin } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import ReactMarkdown from 'react-markdown';
@@ -15,6 +15,31 @@ const Dashboard = () => {
     const [lectureId, setLectureId] = useState(null);
     const [activeTab, setActiveTab] = useState('summary'); // 'transcript', 'summary', 'quiz'
     const [parsedSummary, setParsedSummary] = useState({ transcript: '', summary: '', quiz: '' });
+    
+    // Stats & History
+    const [stats, setStats] = useState({ total: 0, successful: 0, streak: 0 });
+    
+    useEffect(() => {
+        const fetchHistory = async () => {
+            try {
+                const response = await api.get('/profile/history');
+                if (response.data.success) {
+                    const data = response.data.data;
+                    const total = data.length;
+                    const successful = data.filter(item => item.status === 'Completed').length;
+                    let streak = 0;
+                    if (data.length > 0) {
+                        const dates = [...new Set(data.map(item => new Date(item.createdAt).toDateString()))];
+                        streak = dates.length; // Active study days
+                    }
+                    setStats({ total, successful, streak });
+                }
+            } catch (error) {
+                console.error("Failed to fetch history for stats", error);
+            }
+        };
+        fetchHistory();
+    }, []);
 
     const parseMarkdown = (markdown) => {
         const sections = { transcript: '', summary: '', quiz: '' };
