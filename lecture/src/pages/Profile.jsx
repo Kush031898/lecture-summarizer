@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { User, Phone, Calendar, GraduationCap, Building, Loader2, Save, History, ChevronDown, ChevronUp, CheckCircle2, Clock, AlertCircle, Lock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../utils/api';
+import { useAuth } from '../context/AuthContext';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 
 const Profile = () => {
+    const { user } = useAuth();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [formData, setFormData] = useState({
@@ -50,7 +52,7 @@ const Profile = () => {
                     setHistory(historyRes.data.data);
                 }
             } catch (error) {
-                toast.error("Failed to load profile data");
+                toast.error("Unable to load profile data. Please try again.");
             } finally {
                 setLoading(false);
             }
@@ -70,12 +72,12 @@ const Profile = () => {
         try {
             const response = await api.put('/profile/updateProfile', formData);
             if (response.data.success) {
-                toast.success("Profile updated successfully!");
+                toast.success("Profile updated successfully.");
             } else {
-                toast.error(response.data.message || "Failed to update profile");
+                toast.error(response.data.message || "Failed to update profile. Please try again.");
             }
         } catch (error) {
-            toast.error("Error updating profile");
+            toast.error("An error occurred while updating your profile. Please try again later.");
         } finally {
             setSaving(false);
         }
@@ -90,24 +92,24 @@ const Profile = () => {
         e.preventDefault();
         
         if (passwordData.newPassword !== passwordData.confirmNewPassword) {
-            return toast.error("New password and confirm password do not match");
+            return toast.error("New password and confirm password do not match. Please ensure they are identical.");
         }
         
         setPasswordSaving(true);
         try {
             const response = await api.post('/summarizer/changepassword', passwordData);
             if (response.data.success) {
-                toast.success("Password updated successfully!");
+                toast.success("Your password has been updated securely.");
                 setPasswordData({
                     oldPassword: '',
                     newPassword: '',
                     confirmNewPassword: ''
                 });
             } else {
-                toast.error(response.data.message || "Failed to update password");
+                toast.error(response.data.message || "Failed to update your password. Please try again.");
             }
         } catch (error) {
-            toast.error(error.response?.data?.message || "Error updating password");
+            toast.error(error.response?.data?.message || "An error occurred while updating your password. Please try again later.");
         } finally {
             setPasswordSaving(false);
         }
@@ -153,7 +155,7 @@ const Profile = () => {
                         <User className="w-8 h-8" />
                     </div>
                     <div>
-                        <h2 className="text-3xl font-bold">Your Profile</h2>
+                        <h2 className="text-3xl font-bold">{user?.firstName ? `${user.firstName}'s Profile` : 'Your Profile'}</h2>
                         <p className="text-slate-400 mt-1">Manage your personal information and preferences.</p>
                     </div>
                 </div>

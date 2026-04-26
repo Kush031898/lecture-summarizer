@@ -33,8 +33,7 @@ exports.sendOtp = async (req, res) => {
         const OtpPayload = { email, otp };
         // now create the entry of the otp in the data base 
         const Otpcreate = await OTP.create(OtpPayload);
-        await mailSender(email, "OTP for the verification", otp);
-        console.log("The mail is sent successfully");
+        console.log("OTP created and email triggered via pre-save hook");
         return res.status(200).json({
             success: true,
             message: "OTP sent successfully",

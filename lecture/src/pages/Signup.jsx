@@ -24,19 +24,19 @@ const Signup = () => {
 
     const handleSendOtp = async () => {
         if (!formData.email) {
-            return toast.error("Please enter your email first");
+            return toast.error("Please enter your email address to receive an OTP.");
         }
         setSendingOtp(true);
         try {
             const response = await api.post('/summarizer/sendOtp', { email: formData.email });
             if (response.data.success) {
-                toast.success('OTP sent successfully!');
+                toast.success('A One-Time Password has been sent to your email.');
                 setOtpSent(true);
             } else {
-                toast.error(response.data.message || 'Failed to send OTP');
+                toast.error(response.data.message || 'Unable to send OTP. Please try again.');
             }
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Something went wrong');
+            toast.error(error.response?.data?.message || 'An error occurred while sending the OTP. Please try again later.');
         } finally {
             setSendingOtp(false);
         }
@@ -45,23 +45,23 @@ const Signup = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (formData.password !== formData.confirmPassword) {
-            return toast.error("Passwords do not match");
+            return toast.error("The passwords you entered do not match. Please try again.");
         }
         if (!formData.otp) {
-            return toast.error("Please enter the OTP");
+            return toast.error("Please enter the One-Time Password sent to your email.");
         }
         
         setLoading(true);
         try {
             const response = await api.post('/summarizer/signup', formData);
             if (response.data.success) {
-                toast.success('Account created! Please log in.');
+                toast.success('Your account has been created successfully. You can now log in.');
                 navigate('/login');
             } else {
-                toast.error(response.data.message || 'Signup failed');
+                toast.error(response.data.message || 'Unable to complete signup. Please verify your details.');
             }
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Something went wrong');
+            toast.error(error.response?.data?.message || 'An error occurred during signup. Please try again later.');
         } finally {
             setLoading(false);
         }

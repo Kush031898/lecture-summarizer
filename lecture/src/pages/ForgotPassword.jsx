@@ -15,13 +15,13 @@ const ForgotPassword = () => {
         try {
             const response = await api.post('/summarizer/reset-password-token', { email });
             if (response.data.success) {
-                toast.success('Reset email sent successfully!');
+                toast.success('A password reset link has been sent to your email.');
                 setEmailSent(true);
             } else {
-                toast.error(response.data.message || 'Failed to send reset email');
+                toast.error(response.data.message || 'Unable to send password reset email. Please try again.');
             }
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Something went wrong');
+            toast.error(error.response?.data?.message || 'An error occurred while processing your request. Please try again later.');
         } finally {
             setLoading(false);
         }

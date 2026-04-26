@@ -18,14 +18,14 @@ const Login = () => {
         try {
             const response = await api.post('/summarizer/login', { email, password });
             if (response.data.success) {
-                toast.success('Welcome back!');
+                toast.success('Welcome back to your account.');
                 login(response.data.token, response.data.user);
                 navigate('/');
             } else {
-                toast.error(response.data.message || 'Login failed');
+                toast.error(response.data.message || 'Login failed. Please verify your credentials.');
             }
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Something went wrong');
+            toast.error(error.response?.data?.message || 'An error occurred during login. Please try again.');
         } finally {
             setLoading(false);
         }

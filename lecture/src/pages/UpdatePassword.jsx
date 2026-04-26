@@ -15,7 +15,7 @@ const UpdatePassword = () => {
         e.preventDefault();
         
         if (password !== confirmPassword) {
-            return toast.error("Passwords do not match");
+            return toast.error("The passwords you entered do not match. Please ensure they are identical.");
         }
         
         setLoading(true);
@@ -26,13 +26,13 @@ const UpdatePassword = () => {
                 token 
             });
             if (response.data.success) {
-                toast.success('Password reset successfully!');
+                toast.success('Your password has been successfully reset. You can now log in.');
                 navigate('/login');
             } else {
-                toast.error(response.data.message || 'Failed to reset password');
+                toast.error(response.data.message || 'Unable to reset your password. Please try again.');
             }
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Something went wrong');
+            toast.error(error.response?.data?.message || 'An error occurred while resetting your password. Please try again later.');
         } finally {
             setLoading(false);
         }
