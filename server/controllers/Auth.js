@@ -4,49 +4,47 @@ const OTP = require("../models/Otp");
 const crypto = require("crypto");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const mailSender = require("../utils/mailSender"); 
+const mailSender = require("../utils/mailSender");
 require("dotenv").config();
-exports.sendOtp = async(req,res) => {
-  try{
+exports.sendOtp = async (req, res) => {
+    try {
         // fetch the email to which we want to send the email 
-        console.log("Printing the request from the front end ",req.body);
-        const{email} = req.body;
+        console.log("Printing the request from the front end ", req.body);
+        const { email } = req.body;
 
         // check if the user already exits 
-        const checkUser = await User.findOne({email});
+        const checkUser = await User.findOne({ email });
 
         // check for the user 
-        if(checkUser)
-        {
+        if (checkUser) {
             return res.status(400).json({
-                success:false,
-                message:"User is already registered",
+                success: false,
+                message: "User is already registered",
             })
         }
-            // now generate the otp 
-            // 1. Generate a 6-digit random number
+        // now generate the otp 
+        // 1. Generate a 6-digit random number
         const otp = crypto.randomInt(100000, 999999).toString();
 
         // 2. Hash it (Security best practice)
         const hashedOtp = await bcrypt.hash(otp, 10);
 
         // create the otp payload which will contain all the info about the otp 
-        const OtpPayload = {email,otp};
+        const OtpPayload = { email, otp };
         // now create the entry of the otp in the data base 
         const Otpcreate = await OTP.create(OtpPayload);
-        await mailSender(email, "OTP Verification", otp);
-            console.log("The mail is sent successfully");
+        await mailSender(email, "OTP for the verification", otp);
+        console.log("The mail is sent successfully");
         return res.status(200).json({
-            success:true,
-            message:"OTP sent successfully",
+            success: true,
+            message: "OTP sent successfully",
         });
     }
-    catch(error)
-    {
-        console.log("here printing the error in the send otp controller",error.message);
+    catch (error) {
+        console.log("here printing the error in the send otp controller", error.message);
         return res.status(500).json({
-            success:false,
-            message:"There was an  error in sending the otp "
+            success: false,
+            message: "There was an  error in sending the otp "
         })
     }
 }
@@ -54,150 +52,141 @@ exports.sendOtp = async(req,res) => {
 
 /* sign up :- we don't have to save the confirmpassword in the data base , because , we have  already saved the 
 password , and itr is like saving two things repeadtely, the confirmPassword has done  its job when it is checked with  the password */
-exports.signUp = async(req,res) =>{
-    try{
-                // fetching the data from the front end 
-            const {firstName,lastName,email,password,confirmPassword,otp} = req.body;
-            // validate if anything is absent or not 
-            if(!firstName || !lastName || !email || !password || !confirmPassword){
-                return res.status(403).json({
-                    success:false,
-                    message:"All the fields are required",
-                })
-            }
-            // match the password and the confirm Password , and if they are nit matching return  the false reaponse 
-            if(password !== confirmPassword)
-            {
-                return res.status(403).json({
-                    success:false,
-                    message:"Password and confirm password are different",
-                });
-            }
-            // check if the user is already registered 
-            const existingUser = await User.findOne({email});
-            if(existingUser)
-            {
-                return  res.status(403).json({
-                    success:false,
-                    message:"User is already registered",
-                })
-            }
-            // find most recent otp sended to the email 
-            // here there are  two things to keep in the mind and that is such that , :-
-            // The findOne returns a  single object  {} (or null if no match is found).
-            // The find Returns: An Array of Objects [{...}, {...}] (even if only 1 item is found, it's still inside an array).
-            const recentOtp = await OTP.findOne({email}).sort({createdAt:(-1)});
-            console.log("Here printing the recent otp send to the email :- ",recentOtp);
-            // validate the OTP
-            if(recentOtp.length === 0)
-            {
-                return res.status(400).json({
-                    success:false,
-                    message:"OTP not Found",
-                });
-
-            } 
-            // so as the recentOtp contains the object we are matching here the Otp and the otp value inside the recentOtp object 
-            else if(otp !== recentOtp.otp)
-            {
-                return res.status(400).json({
-                    success:false,
-                    message:"Invalid Otp"
-                })
-            }
-            /*As now the user is verified , the user has enetered the Otp and it is also correct , we just have to hash the password 
-            for the security , and then save the entry in the database */
-            const hashedpassword = await bcrypt.hash(password,10);
-            // as we have to add the additional details also in the database , but at first the additinal details will be null 
-            const Profile = await Adddetail.create({}); // we do not want ro create the object of the additional details here 
-            // also , as we have created that already in the model , just here making sure that the values that are  initialized there , and used here and an object is created 
-            // now create the entry in the database 
-            const user = await User.create({
-                firstName,
-                lastName,
-                email,
-                password:hashedpassword,
-                additionalDetails:Profile._id,
+exports.signUp = async (req, res) => {
+    try {
+        // fetching the data from the front end 
+        const { firstName, lastName, email, password, confirmPassword, otp } = req.body;
+        // validate if anything is absent or not 
+        if (!firstName || !lastName || !email || !password || !confirmPassword) {
+            return res.status(403).json({
+                success: false,
+                message: "All the fields are required",
+            })
+        }
+        // match the password and the confirm Password , and if they are nit matching return  the false reaponse 
+        if (password !== confirmPassword) {
+            return res.status(403).json({
+                success: false,
+                message: "Password and confirm password are different",
+            });
+        }
+        // check if the user is already registered 
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(403).json({
+                success: false,
+                message: "User is already registered",
+            })
+        }
+        // find most recent otp sended to the email 
+        // here there are  two things to keep in the mind and that is such that , :-
+        // The findOne returns a  single object  {} (or null if no match is found).
+        // The find Returns: An Array of Objects [{...}, {...}] (even if only 1 item is found, it's still inside an array).
+        const recentOtp = await OTP.findOne({ email }).sort({ createdAt: (-1) });
+        console.log("Here printing the recent otp send to the email :- ", recentOtp);
+        // validate the OTP
+        if (recentOtp.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "OTP not Found",
             });
 
-            return res.status(200).json({
-                success:true,
-                message:"User registered Successfully",
-                user,
+        }
+        // so as the recentOtp contains the object we are matching here the Otp and the otp value inside the recentOtp object 
+        else if (otp !== recentOtp.otp) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid Otp"
             })
+        }
+        /*As now the user is verified , the user has enetered the Otp and it is also correct , we just have to hash the password 
+        for the security , and then save the entry in the database */
+        const hashedpassword = await bcrypt.hash(password, 10);
+        // as we have to add the additional details also in the database , but at first the additinal details will be null 
+        const Profile = await Adddetail.create({}); // we do not want ro create the object of the additional details here 
+        // also , as we have created that already in the model , just here making sure that the values that are  initialized there , and used here and an object is created 
+        // now create the entry in the database 
+        const user = await User.create({
+            firstName,
+            lastName,
+            email,
+            password: hashedpassword,
+            additionalDetails: Profile._id,
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "User registered Successfully",
+            user,
+        })
     }
-    catch(error)
-    {
+    catch (error) {
         console.log(error.message);
         return res.status(500).json({
-            success:false,
-            message:"There was an error in registering the user.Please try again later"
+            success: false,
+            message: "There was an error in registering the user.Please try again later"
         })
     }
 }
 // login 
 // now comes the logic of the login 
-exports.login = async(req,res) =>{
+exports.login = async (req, res) => {
     try {
         // fetch the dataa from the request's body  
-        const{email,password} = req.body;
+        const { email, password } = req.body;
         // validate the data 
-        if(!email ||  !password)
-        {
+        if (!email || !password) {
             return res.status(403).json({
-                success:false,
-                message:"Please enter all the fields",
+                success: false,
+                message: "Please enter all the fields",
             })
         }
         // check if the user has registered or not 
-        const user = await User.findOne({email});
-        if(!user)
-        {
+        const user = await User.findOne({ email });
+        if (!user) {
             return res.status(401).json({
-                success:false,
-                message:"The User is not registered . Please register first",
+                success: false,
+                message: "The User is not registered . Please register first",
             })
         }
         console.log(user);
         // Match the password and create the jwt 
-        if(await bcrypt.compare(password,user.password))
-        {
+        if (await bcrypt.compare(password, user.password)) {
             // the payload that we want to store in the token 
             const payload = {
-                email :user.email,
+                email: user.email,
                 id: user._id,
             }
-            const token = jwt.sign(payload,process.env.JWT_SECRET,{
-                expiresIn:'2h',
+            const token = jwt.sign(payload, process.env.JWT_SECRET, {
+                expiresIn: '2h',
             })
             // as we arec passing the cookie and in that we are passing the user , so no one should see the secure password that's why , this is done 
             user.password = undefined;
             // create the cookie 
             const options = {
-                expires : new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // through this we are settign the expiri time of the cokkie , when the cokkie time expores we can't them login 
-                httpOnly : true,
+                expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // through this we are settign the expiri time of the cokkie , when the cokkie time expores we can't them login 
+                httpOnly: true,
             }
-            res.cookie("token",token,options).status(200).json({
-                success:true,
+            res.cookie("token", token, options).status(200).json({
+                success: true,
                 user,
                 token,
-                message:"Logged In Successfully",
+                message: "Logged In Successfully",
             })
         }
-        else{
-            return  res.status(401).json({
-                success:false,
-                message:"The entered password is incorrect",
+        else {
+            return res.status(401).json({
+                success: false,
+                message: "The entered password is incorrect",
             })
         }
-        
+
     }
-    catch(error)
-    {
+    catch (error) {
         console.log(error.message);
         return res.status(500).json({
-            success:false,
-            message:"Can't Login , Please try again later",
+            success: false,
+            message: "Can't Login , Please try again later",
         })
     }
 }
